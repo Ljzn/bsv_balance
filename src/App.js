@@ -22,7 +22,7 @@ export default function App() {
       <div>
         <label>I Like It: </label>
         <MoneyButton
-          to="390"
+          to="1344kyFGPUWYJokpoSsH7geWHDAjt2xQUu"
           amount="0.1"
           currency="USD"
           onPayment={() =>
