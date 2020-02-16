@@ -28,9 +28,11 @@ let runQuery = async (query, handler, addr) => {
     })
     .then(function(r) {
       let result = r.c.concat(r.u);
-      result = _.map(result, e => {
-        return handler(e, addr);
-      });
+      result = _.flatten(
+        _.map(result, e => {
+          return handler(e, addr);
+        })
+      );
       // console.log(result, 'result');
       return result;
     });
@@ -49,6 +51,9 @@ let queryUnspends = addr => {
         "tx.h": 1,
         "out.e": 1
       }
+    },
+    r: {
+      f: `[.[] | [ {tx: .tx.h, t: .blk.t, out: .out | map(select(.e.a == "${addr}"))} ] | .[] ]`
     }
   };
 };
@@ -65,28 +70,35 @@ let querySpents = addr => {
         "tx.h": 1,
         "in.e": 1
       }
+    },
+    r: {
+      f: `[.[] | [ {t: .blk.t, in: .in | map(select(.e.a == "${addr}"))} ] | .[] ]`
     }
   };
 };
 
 let handleUnspend = (elem, addr) => {
-  let out = elem.out.filter(o => o.e.a === addr)[0];
-  return {
-    txid: elem.tx.h,
-    index: out.e.i,
-    v: out.e.v,
-    t: elem.blk.t
-  };
+  let outs = elem.out;
+  return _.map(outs, o => {
+    return {
+      txid: elem.tx,
+      index: o.e.i,
+      v: o.e.v,
+      t: elem.t
+    };
+  });
 };
 
-let handleSpent = (elem, addr) => {
-  let myin = elem.in.filter(o => o.e.a === addr)[0];
-  return {
-    txid: elem.tx.h,
-    index: myin.e.i,
-    v: 0,
-    t: elem.blk.t
-  };
+let handleSpent = (elem, _addr) => {
+  let ins = elem.in;
+  return _.map(ins, i => {
+    return {
+      txid: i.e.h,
+      index: i.e.i,
+      v: 0,
+      t: elem.t
+    };
+  });
 };
 
 export { getTransactions };
