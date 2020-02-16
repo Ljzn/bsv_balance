@@ -1,6 +1,7 @@
 import React from "react";
 import "./styles.css";
 import Curved from "./Curved";
+import MoneyButton from "@moneybutton/react-money-button";
 
 const jumpToAddr = () => {
   let addr = document.getElementById("addr").value;
@@ -18,6 +19,18 @@ export default function App() {
       <button onClick={_ => jumpToAddr()}>Go</button>
       <Curved address={window.location.pathname.replace("/", "")} />
       <p>powered by euler.bitdb</p>
+      <div>
+        <label>I Like It: </label>
+        <MoneyButton
+          to="390"
+          amount="0.1"
+          currency="USD"
+          onPayment={() =>
+            (document.getElementById("greet").innerText = "Thank U!❤")
+          }
+        />
+        <label id="greet" />
+      </div>
     </div>
   );
 }
