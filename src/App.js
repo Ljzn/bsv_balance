@@ -18,7 +18,7 @@ export default function App() {
       <input id="addr" />
       <button onClick={_ => jumpToAddr()}>Go</button>
       <Curved address={window.location.pathname.replace("/", "")} />
-      <p>powered by euler.bitdb</p>
+      <p>powered by euler.bitdb & bitsocket</p>
       <div>
         <label>I Like It: </label>
         <MoneyButton

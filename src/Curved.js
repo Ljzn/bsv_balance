@@ -1,7 +1,7 @@
 import React from "react";
 import { Chart, Geom, Axis, Tooltip, Legend } from "bizcharts";
 import _ from "underscore";
-import { getTransactions } from "./euler";
+import { getTransactions, bitsocket } from "./euler";
 
 const balance_of_time = (unspends, spents) => {
   spents = spents.map(x => {
@@ -20,7 +20,7 @@ const balance_of_time = (unspends, spents) => {
   let actions_of_time = _.sortBy(_.groupBy(actions, a => a.t), arr => arr[0].t);
   // console.log(actions_of_time, "actions_of_time");
 
-  let balance_of_time = _.reduce(
+  const btmap = _.reduce(
     actions_of_time,
     (args, actions) => {
       const cur_unspends = args.us;
@@ -42,7 +42,7 @@ const balance_of_time = (unspends, spents) => {
         return _.reject(us, u => u.txid === s.txid && u.index === s.index);
       }, cur_unspends1);
       // console.log(cur_unspends2, "unspents2");
-      let cur_balance = _.reduce(cur_unspends2, (b, u) => (b += u.v), 0);
+      const cur_balance = _.reduce(cur_unspends2, (b, u) => (b += u.v), 0);
       // console.log(cur_balance, 'balance');
       return {
         us: cur_unspends2,
@@ -56,7 +56,7 @@ const balance_of_time = (unspends, spents) => {
   ).map;
 
   let result = [];
-  balance_of_time.forEach((v, k) => {
+  btmap.forEach((v, k) => {
     result.push({
       date: k,
       balance: v / 100000000
@@ -66,7 +66,16 @@ const balance_of_time = (unspends, spents) => {
 };
 
 function timestampToTime(timestamp) {
-  var date = new Date(timestamp * 1000); //时间戳为10位需*1000，时间戳为13位的话不需乘1000
+  let date;
+  let type = typeof timestamp;
+  if (type === "string") {
+    return timestamp;
+  } else if (type === "object") {
+    date = new Date();
+    date.setTime(date.getTime());
+  } else {
+    date = new Date(timestamp * 1000); //时间戳为10位需*1000，时间戳为13位的话不需乘1000
+  }
   // console.log(date);
   var Y = date.getFullYear() + "-";
   var M =
@@ -87,12 +96,39 @@ class Curved extends React.Component {
     this.state = {
       data: null,
       addr: null,
+      spents: [],
+      unspends: [],
       tip: "Accounting ledger..."
     };
   }
 
   componentDidMount() {
     this.renderData();
+  }
+
+  addActions(type, base, actions) {
+    let new_base = base;
+    let unspends = this.state.unspends;
+    let spents = this.state.spents;
+    _.each(actions, a => {
+      new_base = _.reject(
+        new_base,
+        b => b.txid === a.txid && b.index === a.index
+      );
+      new_base.push(a);
+    });
+    if (type === "unspend") {
+      unspends = new_base;
+    } else {
+      spents = new_base;
+    }
+    let data = balance_of_time(unspends, spents);
+    // console.log(data);
+    this.setState({
+      data,
+      unspends,
+      spents
+    });
   }
 
   async renderData() {
@@ -111,10 +147,19 @@ class Curved extends React.Component {
     // console.log(unspends, "unspends");
     // console.log(spents, "spents");
 
+    bitsocket(addr, "unspend", actions => {
+      this.addActions("unspend", this.state.unspends, actions);
+    });
+    bitsocket(addr, "spent", actions => {
+      this.addActions("spent", this.state.spents, actions);
+    });
+
     let data = balance_of_time(unspends, spents);
     // console.log(data);
     this.setState({
       data: data,
+      unspends,
+      spents,
       tip: ""
     });
   }

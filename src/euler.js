@@ -101,4 +101,33 @@ let handleSpent = (elem, _addr) => {
   });
 };
 
-export { getTransactions };
+function bitsocket(addr, type, callback) {
+  let query;
+  let handler;
+  if (type === "unspend") {
+    query = queryUnspends(addr);
+    handler = handleUnspend;
+  } else if (type === "spent") {
+    query = querySpents(addr);
+    handler = handleSpent;
+  } else {
+    alert("wrong type: " + type);
+  }
+  // Base64 encode your bitquery
+  const b64 = btoa(JSON.stringify(query));
+  // Subscribe
+  const sock = new EventSource("https://txo.bitsocket.network/s/" + b64);
+  sock.onmessage = function(e) {
+    const raw = e.data;
+    console.log(raw, "raw");
+    const json = JSON.parse(raw);
+    if (json.type === "push") {
+      // console.log(json.data);
+      const actions = _.flatten(_.map(json.data, handler));
+      // console.log(actions, "actions");
+      callback(actions);
+    }
+  };
+}
+
+export { getTransactions, bitsocket };
