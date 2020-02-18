@@ -20,7 +20,7 @@ async function getTransactions(addr, type) {
 let runQuery = async (query, handler, addr) => {
   var b64 = btoa(JSON.stringify(query));
   var url =
-    "https://euler.bitdb.network/q/13Q2RdxNQRYaPotZxJ64yZbWuHrpVwut1Z/" + b64;
+    "https://genesis.bitdb.network/q/1FnauZ9aUH2Bex6JzdcV4eNX7oLSSEbxtN/" + b64;
   var header = { headers: { key: "1344kyFGPUWYJokpoSsH7geWHDAjt2xQUu" } };
   let data = await fetch(url, header)
     .then(function(r) {
