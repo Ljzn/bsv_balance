@@ -117,6 +117,7 @@ class Curved extends React.Component {
       );
       new_base.push(a);
     });
+    this.show_toast(type);
     if (type === "unspend") {
       unspends = new_base;
     } else {
@@ -131,10 +132,14 @@ class Curved extends React.Component {
     });
   }
 
+  async show_toast(type) {
+    localStorage.setItem("toast", type);
+  }
+
   async renderData() {
     let addr = this.props.address;
     if (addr === "") {
-      addr = "1344kyFGPUWYJokpoSsH7geWHDAjt2xQUu";
+      addr = "1KtVZnseDk5Lj8LoBqDPqHWLrjLie4qB5H";
     }
     // console.log(addr, "curve got addr");
     this.setState({
