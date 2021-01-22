@@ -37,7 +37,7 @@ export default function App() {
         <input id="addr" />
         <button onClick={_ => jumpToAddr()}>Go</button>
         <Curved address={window.location.pathname.replace("/", "")} />
-        <p>powered by planaria.network & bitsocket</p>
+        <p>powered by Bitbus 2.0 & bitsocket</p>
         <div>
           <label>I Like It: </label>
           <MoneyButton

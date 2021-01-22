@@ -119,7 +119,7 @@ let handleUnspend = (elem, addr, r) => {
       txid: elem.tx,
       index: o.e.i,
       v: o.e.v,
-      t: elem.t || Date.now() / 1000
+      t: elem.t
     };
   });
 };

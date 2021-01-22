@@ -73,6 +73,8 @@ function timestampToTime(timestamp) {
   } else if (type === "object") {
     date = new Date();
     date.setTime(date.getTime());
+  } else if (type === "undefined") {
+    date = Date.now() / 1000
   } else {
     date = new Date(timestamp * 1000); //时间戳为10位需*1000，时间戳为13位的话不需乘1000
   }
